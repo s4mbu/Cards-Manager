@@ -16,7 +16,8 @@ body {
   background-color: var(--bg-color);
   font-family: 'VT323', monospace;
   color: white;
-  overflow: hidden;
+  overflow-y: auto; /* Permitir scroll en el body */
+  overflow-x: hidden;
 }
 
 /* --- EFECTOS CRT --- */
@@ -26,9 +27,37 @@ body {
 @keyframes scanline { 0% { background-position: 0 0; } 100% { background-position: 0 100%; } }
 
 /* --- UI COMPONENTS --- */
-.app-container { display: flex; height: 100vh; width: 100vw; }
-.sidebar { width: 250px; background: #1a1a1a; padding: 20px; border-right: 2px solid white; display: flex; flex-direction: column; gap: 10px; z-index: 100; }
-.main-content { flex: 1; padding: 20px; overflow-y: auto; position: relative; }
+/* FIX: Volvemos a Flexbox para alineación automática correcta */
+.app-container { 
+  display: flex; 
+  min-height: 100vh; 
+  width: 100%;
+  position: relative; 
+}
+
+/* FIX: Usamos sticky en lugar de fixed. Ocupa su espacio (no se superpone) pero acompaña el scroll */
+.sidebar { 
+  width: 250px; 
+  background: #1a1a1a; 
+  padding: 20px; 
+  border-right: 2px solid white; 
+  display: flex; 
+  flex-direction: column; 
+  gap: 10px; 
+  z-index: 100;
+  position: sticky; 
+  top: 0;
+  height: 100vh;
+  flex-shrink: 0; /* Evita que se aplaste si falta espacio */
+}
+
+/* FIX: Flex 1 para ocupar el espacio restante automáticamente */
+.main-content { 
+  flex: 1; 
+  padding: 20px; 
+  position: relative;
+  overflow: visible; /* Permite que los tooltips salgan de este contenedor */
+}
 
 .btn {
   background: #333; color: white; border: 2px solid white; padding: 10px 20px;
@@ -48,7 +77,10 @@ input, select {
 /* --- CARTAS --- */
 .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 20px; padding: 20px; }
 .card-wrapper { width: var(--card-w); height: var(--card-h); position: relative; perspective: 1000px; cursor: pointer; }
-.card-wrapper:hover { z-index: 50; }
+
+/* FIX: Z-index alto al hacer hover para estar por encima de la sidebar */
+.card-wrapper:hover { z-index: 500; } 
+
 .card-inner { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; transition: transform 0.1s; }
 
 .clipper {
@@ -64,8 +96,10 @@ input, select {
   background: #2b2b2b; border: 4px solid #fff; border-radius: 10px;
   box-shadow: 0px 8px 0px #7f8c8d; padding: 6px;
   opacity: 0; transform: translateY(-50%) translateX(20px);
-  pointer-events: none; transition: all 0.2s; z-index: 100;
-  rotate: var(--unrotate, 0deg); /* Corrección de rotación */
+  pointer-events: none; transition: all 0.2s; 
+  /* FIX: Z-index muy alto (mayor que sidebar 100) */
+  z-index: 1000; 
+  rotate: var(--unrotate, 0deg);
 }
 .card-wrapper:hover .card-tooltip { opacity: 1; transform: translateY(-50%) translateX(0); }
 .tooltip-header { color: #fff; font-size: 1.4rem; font-weight: bold; text-shadow: 2px 2px 0 #000; margin-bottom: 5px; }
@@ -76,7 +110,7 @@ input, select {
 .rarity-legendary { border: 2px solid #9b59b6; box-shadow: 0 0 15px #9b59b6; animation: pulse 2s infinite; }
 @keyframes pulse { 0% { box-shadow: 0 0 10px #9b59b6; } 50% { box-shadow: 0 0 20px #9b59b6; } 100% { box-shadow: 0 0 10px #9b59b6; } }
 
-/* --- ANIMACIÓN PACK OPENER --- */
+/* --- ANIMACIÓN PACK OPENER AVANZADA --- */
 .pack-scene { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 2000; display: flex; justify-content: center; align-items: center; }
 
 .booster-pack {
@@ -88,7 +122,7 @@ input, select {
 
 .booster-pack.idle { animation: float 3s infinite ease-in-out; }
 
-/* Vibración */
+/* Vibración intensa */
 .booster-pack.vibrating { animation: rumble 0.1s linear infinite; filter: brightness(1.2); }
 @keyframes rumble {
     0% { transform: rotate(0deg) translate(0, 0); }

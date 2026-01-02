@@ -246,7 +246,7 @@ function App() {
 
     if (view === 'login') return (
         <div className="login-screen">
-            <h1 style={{fontSize: '3rem', color: '#ff9f43', textShadow: '4px 4px 0 #000'}}>BALATRO MANAGER</h1>
+            <h1 style={{fontSize: '3rem', color: '#ff9f43', textShadow: '4px 4px 0 #000'}}>CARDS MANAGER</h1>
             <div className="panel">
                 <h2 style={{marginTop:0, textAlign:'center'}}>{isRegistering ? 'CREAR CUENTA' : 'INICIAR SESIÓN'}</h2>
                 <form onSubmit={handleAuthAction}>
