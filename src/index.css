@@ -1,0 +1,135 @@
+/* --- FUENTE E IMPORTS --- */
+@import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+
+:root {
+  --bg-color: #2c3e50;
+  --primary: #4facfe;
+  --secondary: #ff9f43;
+  --danger: #ff4d4d;
+  --success: #2ecc71;
+  --card-w: 140px;
+  --card-h: 190px;
+}
+
+body {
+  margin: 0;
+  background-color: var(--bg-color);
+  font-family: 'VT323', monospace;
+  color: white;
+  overflow: hidden;
+}
+
+/* --- EFECTOS CRT --- */
+.scanlines { position: fixed; inset: 0; pointer-events: none; z-index: 9999; }
+.scanlines::before { content: ""; position: absolute; inset: 0; background: rgba(18, 16, 16, 0.1); opacity: 0.6; }
+.scanlines::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to bottom, transparent 50%, rgba(0,0,0,0.25) 51%); background-size: 100% 4px; animation: scanline 60s linear infinite; }
+@keyframes scanline { 0% { background-position: 0 0; } 100% { background-position: 0 100%; } }
+
+/* --- UI COMPONENTS --- */
+.app-container { display: flex; height: 100vh; width: 100vw; }
+.sidebar { width: 250px; background: #1a1a1a; padding: 20px; border-right: 2px solid white; display: flex; flex-direction: column; gap: 10px; z-index: 100; }
+.main-content { flex: 1; padding: 20px; overflow-y: auto; position: relative; }
+
+.btn {
+  background: #333; color: white; border: 2px solid white; padding: 10px 20px;
+  font-family: 'VT323', monospace; font-size: 1.2rem; cursor: pointer; text-transform: uppercase;
+  box-shadow: 4px 4px 0px rgba(0,0,0,0.5); transition: transform 0.1s;
+}
+.btn:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0px rgba(0,0,0,0.5); }
+.btn-primary { background: var(--primary); border-color: #fff; text-shadow: 1px 1px 0 #000; }
+.btn-danger { background: var(--danger); }
+.btn-success { background: var(--success); }
+
+input, select {
+  background: #222; border: 2px solid #555; color: white; padding: 8px;
+  font-family: 'VT323', monospace; font-size: 1.2rem; width: 100%; margin-bottom: 10px;
+}
+
+/* --- CARTAS --- */
+.card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 20px; padding: 20px; }
+.card-wrapper { width: var(--card-w); height: var(--card-h); position: relative; perspective: 1000px; cursor: pointer; }
+.card-wrapper:hover { z-index: 50; }
+.card-inner { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; transition: transform 0.1s; }
+
+.clipper {
+  position: absolute; inset: 0; background: #fff;
+  clip-path: polygon(0px calc(100% - 10px), 4px calc(100% - 10px), 4px calc(100% - 4px), 10px calc(100% - 4px), 10px 100%, calc(100% - 10px) 100%, calc(100% - 10px) calc(100% - 4px), calc(100% - 4px) calc(100% - 4px), calc(100% - 4px) calc(100% - 10px), 100% calc(100% - 10px), 100% 10px, calc(100% - 4px) 10px, calc(100% - 4px) 4px, calc(100% - 10px) 4px, calc(100% - 10px) 0px, 10px 0px, 10px 4px, 4px 4px, 4px 10px, 0px 10px);
+  filter: drop-shadow(-4px 4px 4px rgba(0,0,0,0.5));
+}
+.card-img { width: 100%; height: 100%; object-fit: cover; }
+
+/* Tooltip Retro */
+.card-tooltip {
+  position: absolute; top: 50%; right: 120%; width: 180px;
+  background: #2b2b2b; border: 4px solid #fff; border-radius: 10px;
+  box-shadow: 0px 8px 0px #7f8c8d; padding: 6px;
+  opacity: 0; transform: translateY(-50%) translateX(20px);
+  pointer-events: none; transition: all 0.2s; z-index: 100;
+  rotate: var(--unrotate, 0deg); /* Corrección de rotación */
+}
+.card-wrapper:hover .card-tooltip { opacity: 1; transform: translateY(-50%) translateX(0); }
+.tooltip-header { color: #fff; font-size: 1.4rem; font-weight: bold; text-shadow: 2px 2px 0 #000; margin-bottom: 5px; }
+.tooltip-body { background: #fff; color: #000; padding: 5px; font-size: 1rem; border-radius: 4px; line-height: 1; }
+
+.rarity-common { border: 2px solid #bdc3c7; }
+.rarity-rare { border: 2px solid #f1c40f; box-shadow: 0 0 10px #f1c40f; }
+.rarity-legendary { border: 2px solid #9b59b6; box-shadow: 0 0 15px #9b59b6; animation: pulse 2s infinite; }
+@keyframes pulse { 0% { box-shadow: 0 0 10px #9b59b6; } 50% { box-shadow: 0 0 20px #9b59b6; } 100% { box-shadow: 0 0 10px #9b59b6; } }
+
+/* --- ANIMACIÓN PACK OPENER --- */
+.pack-scene { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 2000; display: flex; justify-content: center; align-items: center; }
+
+.booster-pack {
+  width: 220px; height: 300px;
+  background: linear-gradient(135deg, #2b3a6b, #4facfe); border: 4px solid white;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; position: relative;
+}
+
+.booster-pack.idle { animation: float 3s infinite ease-in-out; }
+
+/* Vibración */
+.booster-pack.vibrating { animation: rumble 0.1s linear infinite; filter: brightness(1.2); }
+@keyframes rumble {
+    0% { transform: rotate(0deg) translate(0, 0); }
+    25% { transform: rotate(6deg) translate(4px, 4px); }
+    50% { transform: rotate(0deg) translate(-4px, -4px); }
+    75% { transform: rotate(-6deg) translate(4px, -4px); }
+    100% { transform: rotate(0deg) translate(-4px, 4px); }
+}
+
+/* Disolución */
+.booster-pack.dissolving {
+    transition: opacity 0.6s ease-out, transform 0.6s ease-in;
+    opacity: 0; transform: scale(0.9); filter: brightness(2) blur(4px);
+}
+
+@keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+
+/* Partículas */
+.particle {
+    position: absolute; background-color: #4facfe; pointer-events: none; z-index: 2001;
+    box-shadow: 0 0 6px rgba(255,255,255,0.8);
+}
+@keyframes particle-fly {
+    0% { transform: translate(0, 0) scale(1) rotate(0deg); opacity: 1; }
+    100% { transform: translate(var(--tx), var(--ty)) scale(0) rotate(var(--rot)); opacity: 0; }
+}
+
+/* Animación de Cartas Volando */
+@keyframes fly-out {
+    0% { transform: scale(0) translateY(200px); opacity: 0; }
+    100% { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+/* Helpers */
+.login-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; }
+.panel { background: rgba(0,0,0,0.6); border: 2px solid white; padding: 20px; border-radius: 10px; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
+.notification { background: var(--danger); color: white; padding: 5px 10px; border-radius: 4px; animation: blink 1s infinite; font-size: 0.9rem; margin-top: 10px; cursor: pointer; text-align: center; border: 1px solid white; }
+@keyframes blink { 50% { opacity: 0.5; } }
+.table-area { min-height: 200px; border: 4px dashed rgba(255,255,255,0.2); border-radius: 20px; display: flex; justify-content: center; align-items: center; margin-bottom: 20px; position: relative; flex-wrap: wrap; gap: 20px; padding: 20px;}
+.table-label { position: absolute; font-size: 2rem; color: rgba(255,255,255,0.1); font-weight: bold; }
+.card-unseen { filter: brightness(0); opacity: 0.3; }
+.card-collected { filter: grayscale(100%); opacity: 0.6; }
+.mb-4 { margin-bottom: 20px; }
+.w-100 { width: 100%; }
