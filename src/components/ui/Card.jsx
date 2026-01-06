@@ -5,6 +5,11 @@ export const Card = ({ data, onClick, status = 'owned', showTooltip = true, styl
     const shineRef = useRef(null);
     const glareRef = useRef(null);
 
+    // --- PROTECCIÓN CRÍTICA ---
+    // Si no hay datos, no renderizamos nada. Esto evita la pantalla blanca (Crash).
+    if (!data) return null;
+    // --------------------------
+
     const handleMouseMove = (e) => {
         if (!tiltRef.current) return;
         const rect = tiltRef.current.getBoundingClientRect();
@@ -46,11 +51,24 @@ export const Card = ({ data, onClick, status = 'owned', showTooltip = true, styl
     if (status === 'unseen') filterClass = 'card-unseen';
     if (status === 'collected') filterClass = 'card-collected';
 
+    // Valores seguros por defecto (Protección extra contra undefined)
+    const rarity = data.rarity || 'common';
+    const name = data.name || '???';
+    const desc = data.desc || 'Sin descripción';
+    const img = data.img || '';
+
     return (
-        <div className="card-wrapper" style={style} onMouseMove={handleMouseMove} onMouseLeave={handleMouseLeave} onClick={() => onClick && onClick(data)}>
-            <div className={`card-inner rarity-${data.rarity} ${filterClass}`} ref={tiltRef}>
+        <div 
+            className="card-wrapper" 
+            style={style} 
+            onMouseMove={handleMouseMove} 
+            onMouseLeave={handleMouseLeave} 
+            onClick={() => onClick && onClick(data)}
+        >
+            <div className={`card-inner rarity-${rarity} ${filterClass}`} ref={tiltRef}>
                 <div className="clipper">
-                    <img src={data.img} className="card-img" alt={data.name} />
+                    {/* Renderizado condicional de la imagen */}
+                    {img && <img src={img} className="card-img" alt={name} />}
                     
                     <div ref={shineRef} className="shine-effect" style={{
                         position: 'absolute', inset: 0,
@@ -66,9 +84,9 @@ export const Card = ({ data, onClick, status = 'owned', showTooltip = true, styl
 
                 {showTooltip && (
                     <div className="card-tooltip">
-                        <div className="tooltip-header">{data.name}</div>
-                        <div className="tooltip-body">{data.desc}</div>
-                        <div style={{ fontSize: '0.8rem', marginTop: '5px', color: '#aaa' }}>{data.rarity.toUpperCase()}</div>
+                        <div className="tooltip-header">{name}</div>
+                        <div className="tooltip-body">{desc}</div>
+                        <div style={{ fontSize: '0.8rem', marginTop: '5px', color: '#aaa' }}>{rarity.toUpperCase()}</div>
                     </div>
                 )}
             </div>

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Card } from './Card';
+import { Card } from '../ui/Card';
 
 export const PackOpener = ({ onClose, onFinish, cardPool }) => {
     const [stage, setStage] = useState('idle'); // idle, vibrating, dissolving, open
@@ -53,16 +53,48 @@ export const PackOpener = ({ onClose, onFinish, cardPool }) => {
 
     const generateCards = () => {
         const pool = cardPool || [];
-        const generated = Array(4).fill(null).map(() => {
+        if (pool.length === 0) {
+            alert('No hay cartas disponibles en el mazo');
+            onClose();
+            return;
+        }
+
+        const generated = [];
+        const availableCards = [...pool];
+        
+        for (let i = 0; i < 4; i++) {
+            if (availableCards.length === 0) break;
+
             const rand = Math.random();
             let targetRarity = 'common';
             if (rand > 0.95) targetRarity = 'legendary';
             else if (rand > 0.70) targetRarity = 'rare';
 
-            const filtered = pool.filter(c => c.rarity === targetRarity);
-            const finalPool = filtered.length > 0 ? filtered : pool;
-            return finalPool[Math.floor(Math.random() * finalPool.length)];
-        });
+            let filtered = availableCards.filter(c => 
+                c.rarity === targetRarity && (c.quantity || 0) > 0
+            );
+            
+            if (filtered.length === 0) {
+                filtered = availableCards.filter(c => (c.quantity || 0) > 0);
+            }
+
+            if (filtered.length === 0) break;
+
+            const selectedCard = filtered[Math.floor(Math.random() * filtered.length)];
+            generated.push(selectedCard);
+
+            const cardIndex = availableCards.findIndex(c => c.id === selectedCard.id);
+            if (cardIndex !== -1) {
+                availableCards[cardIndex] = {
+                    ...availableCards[cardIndex],
+                    quantity: availableCards[cardIndex].quantity - 1
+                };
+                if (availableCards[cardIndex].quantity <= 0) {
+                    availableCards.splice(cardIndex, 1);
+                }
+            }
+        }
+
         setCards(generated);
     };
 
@@ -82,13 +114,8 @@ export const PackOpener = ({ onClose, onFinish, cardPool }) => {
 
             {stage === 'open' && (
                 <div style={{
-                    display: 'flex', // FIX: Usar Flexbox para ponerlas lado a lado
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    gap: '20px',
-                    width: '100%',
-                    height: '100%',
-                    perspective: '1000px'
+                    display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '20px',
+                    width: '100%', height: '100%', perspective: '1000px'
                 }}>
                     {cards.map((c, i) => (
                         <div key={i} style={{ animation: `fly-out 0.8s ease-out forwards ${i * 0.2}s`, opacity: 0, transform: 'scale(0)' }}>
@@ -96,7 +123,6 @@ export const PackOpener = ({ onClose, onFinish, cardPool }) => {
                         </div>
                     ))}
                     
-                    {/* Botón Guardar siempre visible al final */}
                     <div style={{position:'absolute', bottom:'50px', left:0, right:0, textAlign:'center'}}>
                          <button className="btn btn-primary" onClick={() => onFinish(cards)}>GUARDAR TODO</button>
                     </div>

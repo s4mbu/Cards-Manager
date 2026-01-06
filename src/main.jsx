@@ -5,7 +5,6 @@ import './index.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <div className="scanlines"></div>
     <App />
   </React.StrictMode>,
 )
